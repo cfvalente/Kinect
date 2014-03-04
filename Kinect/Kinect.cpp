@@ -5,6 +5,8 @@
 
 using namespace std;
 
+
+
 bool Kinect_init(INuiSensor* &sensor, HANDLE &rgbStream)
 {
     int numSensors;
@@ -28,8 +30,32 @@ bool Kinect_init(INuiSensor* &sensor, HANDLE &rgbStream)
         2,      // Number of frames to buffer
         NULL,   // Event handle
         &rgbStream);
+
+
+
     return sensor;
 }
+
+void KinectUp()
+{
+	LONG plAngleDegrees;
+	NuiCameraElevationGetAngle(&plAngleDegrees);
+	if(plAngleDegrees+2 < NUI_CAMERA_ELEVATION_MAXIMUM)
+	{
+		NuiCameraElevationSetAngle(plAngleDegrees+2);
+	}
+}
+
+void KinectDown()
+{
+	LONG plAngleDegrees;
+	NuiCameraElevationGetAngle(&plAngleDegrees);
+	if(plAngleDegrees-2 > NUI_CAMERA_ELEVATION_MINIMUM)
+	{
+		NuiCameraElevationSetAngle(plAngleDegrees-2);
+	}
+}
+
 
 
 

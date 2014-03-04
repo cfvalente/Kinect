@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "Controls.h"
+#include "Kinect2.h"
 
 static float vertical_angle = 0.0f;
 static float horizontal_angle = 3.14f;
@@ -41,5 +42,9 @@ int keyboard(int key, int scancode, int action, int mods, int &renderingMode, gl
 		renderingMode = rendering::specular;
 	if(key == GLFW_KEY_0 && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		renderingMode = rendering::all;
+	if(key == GLFW_KEY_UP && (action == GLFW_PRESS || action == GLFW_REPEAT))
+		KinectUp();
+	if(key == GLFW_KEY_DOWN && (action == GLFW_PRESS || action == GLFW_REPEAT))
+		KinectDown();
 	return !CLOSE_WINDOW;
 }

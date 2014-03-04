@@ -164,6 +164,7 @@
     <ClInclude Include="File.h" />
     <ClInclude Include="Info.h" />
     <ClInclude Include="Kinect.h" />
+    <ClInclude Include="Kinect2.h" />
     <ClInclude Include="Loader.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="resource.h" />

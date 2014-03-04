@@ -24,4 +24,5 @@ void getKinectData(GLubyte* dest,INuiSensor* &sensor, HANDLE &rgbStream, int wid
 /// <returns>indicates success or failure</returns>
 bool SaveBitmapToFile(BYTE* pBitmapBits, LONG lWidth, LONG lHeight, WORD wBitsPerPixel, LPCWSTR lpszFilePath);
 
+
 #endif
