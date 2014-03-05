@@ -21,8 +21,10 @@
 
 
 
-#define width 1280
-#define height 960
+#define widthColor 1280
+#define heightColor 960
+#define widthDepth 640
+#define heightDepth 480
 
 using namespace std;
 using namespace glm;
@@ -52,13 +54,14 @@ char *fshader_name = "fshader.glsl";
 
 // OpenGL Variables
 GLuint textureIdColor;              // ID of the texture to contain Kinect RGB Data
-GLubyte dataColor[width*height*4];  // BGRA array containing the texture data
+GLubyte dataColor[widthColor*heightColor*4];  // BGRA array containing the texture data
 
 GLuint textureIdDepth;              // ID of the texture to contain Kinect Depth Data
-GLubyte dataDepth[width*height*4];  // BGRA array containing the texture data
+GLubyte dataDepth[widthDepth*heightDepth*4];  // BGRA array containing the texture data
 
 // Kinect variables
 HANDLE rgbStream;              // The identifier of the Kinect's RGB Camera
+HANDLE depthStream;              // The identifier of the Kinect's Depth Camera
 INuiSensor* sensor;            // The kinect sensor
 
 
@@ -96,11 +99,11 @@ void GL_init(int argc, char *argv[])
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,2);
 	glfwWindowHint(GLFW_SAMPLES,4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);
-	window = glfwCreateWindow(width, height, "Kinect", NULL, NULL);
+	window = glfwCreateWindow(widthColor, heightColor, "Kinect", NULL, NULL);
 	glfwMakeContextCurrent(window);
 	glewExperimental = GL_TRUE; 
 	glewInit();
-	glViewport(0,0,width,height);
+	glViewport(0,0,widthColor,heightColor);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glClearColor ( 0.0f, 0.0f, 0.0f, 1.0f);
@@ -132,20 +135,19 @@ void movement()
 int main(int argc, char *argv[])
 {
 	GL_init(argc,argv);
-	if(!Kinect_init(sensor, rgbStream)) return 1;
+	if(!Kinect_init(sensor, rgbStream, depthStream)) return 1;
 	if(!useShader(programHandle,compileShader(programHandle,vshader_name,fshader_name))) return 1;
 	while(!glfwWindowShouldClose(window))
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glfwPollEvents();
 		movement();
-		getKinectData(dataColor, sensor, rgbStream, width, height);
-		textureIdColor = TextureLoader(dataColor, width, height);
+		getKinectColorData(dataColor, sensor, rgbStream, widthColor, heightColor);
+		textureIdColor = TextureLoader(dataColor, widthColor, heightColor);
 		rendererColor(programHandle, Model, View, Projection, renderingMode, model_dataColor, window);
 
-		//Fazer com depth aqui, talvez seja necessario alterar shaders e tambem a matriz dataDepth dependendo do tipo de dado obtido
-		//getKinectData(dataDepth, sensor, rgbStream, width, height);
-		//textureIdColor = TextureLoader(dataDepth, width, height);
+		getKinectDepthData(dataDepth, sensor, depthStream, widthDepth, heightDepth);
+		textureIdDepth = TextureLoader(dataDepth, widthDepth, heightDepth);
 		rendererDepth(programHandle, Model, View, Projection, renderingMode, model_dataDepth, window);
 
 		glfwSwapBuffers(window);

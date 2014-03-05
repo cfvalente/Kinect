@@ -9,9 +9,11 @@
 #include <iostream>
 
 
-bool Kinect_init(INuiSensor* &sensor,HANDLE &rgbStream);
+bool Kinect_init(INuiSensor* &sensor, HANDLE &rgbStream, HANDLE &depthStream);
 
-void getKinectData(GLubyte* dest,INuiSensor* &sensor, HANDLE &rgbStream, int width, int height);
+void getKinectColorData(GLubyte* destColor, INuiSensor* &sensor, HANDLE &rgbStream, int width, int height);
+
+void getKinectDepthData(GLubyte* destDepth,INuiSensor* &sensor, HANDLE &depthStream, int width, int height);
 
 /// <summary>
 /// Save passed in image data to disk as a bitmap
