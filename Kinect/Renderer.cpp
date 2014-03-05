@@ -11,10 +11,9 @@ using namespace glm;
 
 
 
-void renderer(GLuint programHandle, mat4 Model, mat4 View, mat4 Projection, int renderingMode, model model_data, GLFWwindow* window)
+void rendererColor(GLuint programHandle, mat4 Model, mat4 View, mat4 Projection, int renderingMode, model model_data, GLFWwindow* window)
 {
 	mat4 MVP, ModelView;
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	ModelView = View * Model;
 	MVP = Projection * ModelView;
@@ -30,7 +29,27 @@ void renderer(GLuint programHandle, mat4 Model, mat4 View, mat4 Projection, int 
 	//glDrawArrays(GL_TRIANGLES, 0, 2*3);
 	glDrawElements(GL_TRIANGLES, 3 * model_data.num_faces * sizeof(GL_UNSIGNED_INT), GL_UNSIGNED_INT, (void*)0);
 
-	glfwSwapBuffers(window);
+}
+
+void rendererDepth(GLuint programHandle, mat4 Model, mat4 View, mat4 Projection, int renderingMode, model model_data, GLFWwindow* window)
+{
+	mat4 MVP, ModelView;
+	
+
+	ModelView = View * Model;
+	MVP = Projection * ModelView;
+	GLuint location;
+
+	uniformToShader4mat(programHandle,"MVP", MVP);
+
+	glBindVertexArray(model_data.vaoHandle);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,model_data.elementBufferHandle);
+	//uniformToShader3f(programHandle,"Kd", vec3(model_data.material_kd[model_data.mesh_material[m]][0],model_data.material_kd[model_data.mesh_material[m]][1],model_data.material_kd[model_data.mesh_material[m]][2]));
+	//uniformToShader1f(programHandle,"Shininess", model_data.material_shininess[model_data.mesh_material[m]]);
+
+	//glDrawArrays(GL_TRIANGLES, 0, 2*3);
+	glDrawElements(GL_TRIANGLES, 3 * model_data.num_faces * sizeof(GL_UNSIGNED_INT), GL_UNSIGNED_INT, (void*)0);
+
 }
 
 

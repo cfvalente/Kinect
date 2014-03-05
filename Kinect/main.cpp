@@ -41,7 +41,8 @@ vec3 up = vec3(0.0f,1.0f,0.0f);
 
 int renderingMode;
 
-struct model model_data;
+struct model model_dataColor;
+struct model model_dataDepth;
 
 GLFWwindow* window;
 
@@ -50,8 +51,11 @@ char *fshader_name = "fshader.glsl";
 
 
 // OpenGL Variables
-GLuint textureId;              // ID of the texture to contain Kinect RGB Data
-GLubyte data[width*height*4];  // BGRA array containing the texture data
+GLuint textureIdColor;              // ID of the texture to contain Kinect RGB Data
+GLubyte dataColor[width*height*4];  // BGRA array containing the texture data
+
+GLuint textureIdDepth;              // ID of the texture to contain Kinect Depth Data
+GLubyte dataDepth[width*height*4];  // BGRA array containing the texture data
 
 // Kinect variables
 HANDLE rgbStream;              // The identifier of the Kinect's RGB Camera
@@ -109,8 +113,8 @@ void GL_init(int argc, char *argv[])
 
 	View = glm::lookAt(position,position+direction,up);
 
-	model_data = load_model();
-
+	model_dataColor = load_modelColor();
+	model_dataDepth = load_modelDepth();
 
 	glfwSetErrorCallback(error_callback);
 	glfwSetKeyCallback(window, key_callback);
@@ -132,19 +136,19 @@ int main(int argc, char *argv[])
 	if(!useShader(programHandle,compileShader(programHandle,vshader_name,fshader_name))) return 1;
 	while(!glfwWindowShouldClose(window))
 	{
-
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glfwPollEvents();
 		movement();
-		getKinectData(data, sensor, rgbStream, width, height);
-		textureId = TextureLoader(data, width, height);
-		renderer(programHandle, Model, View, Projection, renderingMode, model_data, window);
+		getKinectData(dataColor, sensor, rgbStream, width, height);
+		textureIdColor = TextureLoader(dataColor, width, height);
+		rendererColor(programHandle, Model, View, Projection, renderingMode, model_dataColor, window);
 
+		//Fazer com depth aqui, talvez seja necessario alterar shaders e tambem a matriz dataDepth dependendo do tipo de dado obtido
+		//getKinectData(dataDepth, sensor, rgbStream, width, height);
+		//textureIdColor = TextureLoader(dataDepth, width, height);
+		rendererDepth(programHandle, Model, View, Projection, renderingMode, model_dataDepth, window);
 
-		
-
-
-
-
+		glfwSwapBuffers(window);
 	}
 	glfwTerminate();
 	return 0;
