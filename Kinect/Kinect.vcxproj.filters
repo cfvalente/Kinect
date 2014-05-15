@@ -74,7 +74,7 @@
     <ClInclude Include="Renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Kinect2.h">
+    <ClInclude Include="KinectMovement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

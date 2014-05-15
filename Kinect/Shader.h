@@ -1,7 +1,7 @@
 #ifndef SHADER
 #define SHADER
 
-#include "Include/glew/glew.h"
+#include <glew/glew.h>
 
 
 void printShader(int shaderIndex);

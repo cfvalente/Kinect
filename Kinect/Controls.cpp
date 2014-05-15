@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "Controls.h"
-#include "Kinect2.h"
+#include "KinectMovement.h"
 
 static float vertical_angle = 0.0f;
 static float horizontal_angle = 3.14f;

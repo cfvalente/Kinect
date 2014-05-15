@@ -1,11 +1,11 @@
 #include <iostream>
 #include <string>
 
-#include "Include/glew/glew.h"
-#include "Include/GLFW/glfw3.h"
+#include <glew/glew.h>
+#include <GLFW/glfw3.h>
 
-#include "Include/glm/glm.hpp"
-#include "Include/glm/gtc/matrix_transform.hpp"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "Shader.h"
 #include "Controls.h"
@@ -19,7 +19,7 @@
 #include "Kinect.h"
 #include "Texture.h"
 
-
+#include <ARToolKitPlus/TrackerSingleMarkerImpl.h>
 
 #define widthColor 1280
 #define heightColor 960
@@ -137,6 +137,11 @@ int main(int argc, char *argv[])
 	GL_init(argc,argv);
 	if(!Kinect_init(sensor, rgbStream, depthStream)) return 1;
 	if(!useShader(programHandle,compileShader(programHandle,vshader_name,fshader_name))) return 1;
+
+
+	std::make_pair<int,int>(1,1);
+	ARToolKitPlus::TrackerSingleMarker *tracker = new ARToolKitPlus::TrackerSingleMarkerImpl<16,16,64, ARToolKitPlus::PIXEL_FORMAT_RGBA>(640,480);
+
 	while(!glfwWindowShouldClose(window))
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

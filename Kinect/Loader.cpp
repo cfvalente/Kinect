@@ -2,9 +2,9 @@
 #include <string>
 #include <stdio.h>
 #include "Loader.h"
-#include "Include/assimp/Importer.hpp"
-#include "Include/assimp/scene.h"
-#include "Include/assimp/postprocess.h"
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 
 

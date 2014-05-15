@@ -2,10 +2,10 @@
 #define RENDERER
 
 
-#include "Include/glew/glew.h"
-#include "Include/GLFW/glfw3.h"
+#include <glew/glew.h>
+#include <GLFW/glfw3.h>
 
-#include "Include/glm/glm.hpp"
+#include <glm/glm.hpp>
 #include "loader.h"
 
 void rendererColor(GLuint programHandle, glm::mat4 Model, glm::mat4 View, glm::mat4 Projection, int renderingMode, model model_data, GLFWwindow* window);

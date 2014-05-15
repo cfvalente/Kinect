@@ -1,8 +1,8 @@
 #ifndef INFO
 #define INFO
 
-#include "Include/glew/glew.h"
-#include "Include/glm/glm.hpp"
+#include <glew/glew.h>
+#include <glm/glm.hpp>
 
 
 ///// <summary>

@@ -1,8 +1,8 @@
 #ifndef KINECT
 #define KINECT
 
-#include "Include/glew/glew.h"
-#include "Include/GLFW/glfw3.h"
+#include <glew/glew.h>
+#include <GLFW/glfw3.h>
 #include "windows.h"
 #include <Ole2.h>
 #include <NuiApi.h>

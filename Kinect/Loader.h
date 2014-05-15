@@ -1,7 +1,7 @@
 #ifndef LOADER
 #define LOADER
 
-#include "Include/glew/glew.h"
+#include <glew/glew.h>
 
 struct model
 {

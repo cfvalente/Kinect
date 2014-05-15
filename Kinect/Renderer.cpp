@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 
-#include "Include/glm/gtc/matrix_transform.hpp"
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "Info.h"
 #include "Renderer.h"

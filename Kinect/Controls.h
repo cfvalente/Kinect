@@ -1,8 +1,8 @@
 #ifndef CONTROLS
 #define CONTROLS
 
-#include "Include/glm/glm.hpp"
-#include "Include/GLFW/glfw3.h"
+#include <glm/glm.hpp>
+#include <GLFW/glfw3.h>
 
 #define CLOSE_WINDOW 1
 #define mouseSpeed 0.0005f
