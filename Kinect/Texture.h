@@ -7,5 +7,7 @@
 
 
 GLuint TextureLoader(GLubyte* data, int width, int height);
+void TextureUnloader(GLuint *textureId);
+
 
 #endif

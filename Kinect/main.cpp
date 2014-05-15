@@ -151,6 +151,9 @@ int main(int argc, char *argv[])
 		rendererDepth(programHandle, Model, View, Projection, renderingMode, model_dataDepth, window);
 
 		glfwSwapBuffers(window);
+
+		TextureUnloader(&textureIdColor);
+		TextureUnloader(&textureIdDepth);
 	}
 	glfwTerminate();
 	return 0;

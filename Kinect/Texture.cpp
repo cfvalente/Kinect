@@ -20,3 +20,10 @@ GLuint TextureLoader(GLubyte* data, int width, int height)
 
 	return textureID;
 }
+
+
+void TextureUnloader(GLuint *textureId)
+{
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glDeleteTextures(1,textureId);
+}

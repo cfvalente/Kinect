@@ -2,6 +2,7 @@
 #include <Ole2.h>
 #include <NuiApi.h>
 #include <iostream>
+#include <limits>
 
 using namespace std;
 
@@ -167,16 +168,19 @@ void getKinectDepthData(GLubyte* destDepth, INuiSensor* &sensor, HANDLE &depthSt
 
             // Note: Using conditionals in this loop could degrade performance.
             // Consider using a lookup table instead when writing production code.
-            BYTE intensity = static_cast<BYTE>(depth >= minDepth && depth <= maxDepth ? depth % 256 : 0);
+            //BYTE intensity = static_cast<BYTE>(depth >= minDepth && depth <= maxDepth ? depth % 256 : 0);
+
+			BYTE intensity = static_cast<BYTE>(/*depth >= minDepth && depth <= maxDepth ?*/ max(255-8*255*(((float)depth/USHRT_MAX)),0));
+			if(intensity >= 256 || intensity < 0) printf("Error: depth intensity out of bounds.\n");
 
             // Write out blue byte
-            *(rgbrun++) = intensity;
+            *(rgbrun++) = 0;
 
             // Write out green byte
             *(rgbrun++) = intensity;
 
             // Write out red byte
-            *(rgbrun++) = intensity;
+            *(rgbrun++) = 0;
 
             // We're outputting BGR, the last byte in the 32 bits is unused so skip it
             // If we were outputting BGRA, we would write alpha here.
