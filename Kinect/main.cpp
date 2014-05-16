@@ -19,7 +19,8 @@
 #include "Kinect.h"
 #include "Texture.h"
 
-#include <ARToolKitPlus/TrackerSingleMarkerImpl.h>
+#include <opencv2/core/core.hpp>
+
 
 #define widthColor 1280
 #define heightColor 960
@@ -137,10 +138,6 @@ int main(int argc, char *argv[])
 	GL_init(argc,argv);
 	if(!Kinect_init(sensor, rgbStream, depthStream)) return 1;
 	if(!useShader(programHandle,compileShader(programHandle,vshader_name,fshader_name))) return 1;
-
-
-	std::make_pair<int,int>(1,1);
-	ARToolKitPlus::TrackerSingleMarker *tracker = new ARToolKitPlus::TrackerSingleMarkerImpl<16,16,64, ARToolKitPlus::PIXEL_FORMAT_RGBA>(640,480);
 
 	while(!glfwWindowShouldClose(window))
 	{
