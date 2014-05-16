@@ -20,7 +20,7 @@
 #include "Texture.h"
 
 #include <opencv2/core/core.hpp>
-
+#include <aruco\aruco.h>
 
 #define widthColor 1280
 #define heightColor 960
@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
 	GL_init(argc,argv);
 	if(!Kinect_init(sensor, rgbStream, depthStream)) return 1;
 	if(!useShader(programHandle,compileShader(programHandle,vshader_name,fshader_name))) return 1;
-
+	aruco::Marker();
 	while(!glfwWindowShouldClose(window))
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
