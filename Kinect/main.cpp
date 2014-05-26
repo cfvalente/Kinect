@@ -21,6 +21,7 @@
 
 #include <opencv2/core/core.hpp>
 #include <aruco\aruco.h>
+#include <opencv2/highgui/highgui.hpp>
 
 #define widthColor 1280
 #define heightColor 960
@@ -65,6 +66,8 @@ HANDLE rgbStream;              // The identifier of the Kinect's RGB Camera
 HANDLE depthStream;              // The identifier of the Kinect's Depth Camera
 INuiSensor* sensor;            // The kinect sensor
 
+// ArUco variables
+aruco::CameraParameters CamParam;
 
 static void error_callback(int error, const char* description)
 {
@@ -131,6 +134,59 @@ void movement()
 	View = lookAt(position,position+direction,up);
 }
 
+bool AR_MarkerDetectorInit()
+{
+	cv::namedWindow("in",1);
+	try
+	{
+		CamParam.readFromXMLFile("camera.yml"); 
+		return 1;
+	}
+	catch(exception e)
+	{
+		return 0;
+	}
+}
+
+
+
+bool AR_MarkerDetector()
+{
+	GLubyte *imageData;
+	aruco::MarkerDetector MDetector;
+	vector<aruco::Marker> Markers;
+	float MarkerSize = 1.7;
+	imageData = new GLubyte[widthColor*heightColor*3];
+	for(int i=0; i<widthColor*heightColor; i++)
+	{
+		imageData[3*i]=dataColor[4*i];
+		imageData[3*i+1]=dataColor[4*i+1];
+		imageData[3*i+2]=dataColor[4*i+2];
+	}
+	cv::Mat Tex(heightColor, widthColor, CV_8UC3, imageData);
+
+	CamParam.resize(Tex.size());
+	try
+	{
+		MDetector.detect(Tex,Markers,CamParam,MarkerSize);
+	}
+	catch(exception e)
+	{
+		return 0;
+	}
+	double mvp[16];
+	cv::Point2f point;
+	for (unsigned int i=0;i<Markers.size();i++) 
+	{
+            cout<<Markers[i]<<endl;
+            Markers[i].draw(Tex,cv::Scalar(0,0,255),2);
+			Markers[i].glGetModelViewMatrix(mvp);
+			point = Markers[i].getCenter();
+	}
+	cv::imshow("in",Tex);
+	delete [] imageData;
+	return 1;
+}
 
 
 int main(int argc, char *argv[])
@@ -138,7 +194,7 @@ int main(int argc, char *argv[])
 	GL_init(argc,argv);
 	if(!Kinect_init(sensor, rgbStream, depthStream)) return 1;
 	if(!useShader(programHandle,compileShader(programHandle,vshader_name,fshader_name))) return 1;
-	aruco::Marker();
+	if(!AR_MarkerDetectorInit()) return 1;
 	while(!glfwWindowShouldClose(window))
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -153,6 +209,8 @@ int main(int argc, char *argv[])
 		rendererDepth(programHandle, Model, View, Projection, renderingMode, model_dataDepth, window);
 
 		glfwSwapBuffers(window);
+
+		AR_MarkerDetector();
 
 		TextureUnloader(&textureIdColor);
 		TextureUnloader(&textureIdDepth);
