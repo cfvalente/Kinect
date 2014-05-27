@@ -6,12 +6,14 @@
 #include "Info.h"
 #include "Renderer.h"
 #include "Shader.h"
+#include "CameraLoader.h"
+#include "ModelLoader.h"
 
 using namespace glm;
 
 
 
-void rendererColor(GLuint programHandle, mat4 Model, mat4 View, mat4 Projection, int renderingMode, model model_data, GLFWwindow* window)
+void rendererColor(GLuint programHandle, mat4 Model, mat4 View, mat4 Projection, int renderingMode, struct camera_model model_data, GLFWwindow* window)
 {
 	mat4 MVP, ModelView;
 
@@ -31,7 +33,7 @@ void rendererColor(GLuint programHandle, mat4 Model, mat4 View, mat4 Projection,
 
 }
 
-void rendererDepth(GLuint programHandle, mat4 Model, mat4 View, mat4 Projection, int renderingMode, model model_data, GLFWwindow* window)
+void rendererDepth(GLuint programHandle, mat4 Model, mat4 View, mat4 Projection, int renderingMode, struct camera_model model_data, GLFWwindow* window)
 {
 	mat4 MVP, ModelView;
 	
@@ -50,6 +52,39 @@ void rendererDepth(GLuint programHandle, mat4 Model, mat4 View, mat4 Projection,
 	//glDrawArrays(GL_TRIANGLES, 0, 2*3);
 	glDrawElements(GL_TRIANGLES, 3 * model_data.num_faces * sizeof(GL_UNSIGNED_INT), GL_UNSIGNED_INT, (void*)0);
 
+}
+
+
+void renderer(GLuint programHandle, mat4 Model, mat4 View, mat4 Projection, mat3 Normal, int renderingMode, struct model model_data, GLFWwindow* window)
+{
+	mat4 MVP, ModelView;
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	ModelView = View * Model;
+	MVP = Projection * ModelView;
+	GLuint location;
+	Normal = mat3(ModelView);
+
+	uniformToShader4mat(programHandle,"MVP", MVP);
+	uniformToShader4mat(programHandle,"ModelView", ModelView);
+	/*uniformToShader4f(programHandle,"LightPosition", LightPosition);
+	uniformToShader3f(programHandle,"La", La);
+	uniformToShader3f(programHandle,"Ld", Ld);
+	uniformToShader3f(programHandle,"Ls", Ls);*/
+	uniformToShader1f(programHandle,"renderingMode", (float)renderingMode);
+
+	for(unsigned int m = 0; m < model_data.num_meshes; m++)
+	{
+		glBindVertexArray(model_data.vaoHandle[m]);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,model_data.elementBufferHandle[m]);
+		uniformToShader3f(programHandle,"Ka", vec3(model_data.material_ka[model_data.mesh_material[m]][0],model_data.material_ka[model_data.mesh_material[m]][1],model_data.material_ka[model_data.mesh_material[m]][2]));
+		uniformToShader3f(programHandle,"Kd", vec3(model_data.material_kd[model_data.mesh_material[m]][0],model_data.material_kd[model_data.mesh_material[m]][1],model_data.material_kd[model_data.mesh_material[m]][2]));
+		uniformToShader3f(programHandle,"Ks", vec3(model_data.material_ks[model_data.mesh_material[m]][0],model_data.material_ks[model_data.mesh_material[m]][1],model_data.material_ks[model_data.mesh_material[m]][2]));
+		uniformToShader1f(programHandle,"Shininess", model_data.material_shininess[model_data.mesh_material[m]]);
+
+		glDrawElements(GL_TRIANGLES, 3 * model_data.num_faces[m] * sizeof(GL_UNSIGNED_INT), GL_UNSIGNED_INT, (void*)0);
+	}
+	glfwSwapBuffers(window);
 }
 
 

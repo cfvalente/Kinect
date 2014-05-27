@@ -39,10 +39,13 @@
     <ClCompile Include="Info.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Loader.cpp">
+    <ClCompile Include="Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer.cpp">
+    <ClCompile Include="ModelLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -68,13 +71,16 @@
     <ClInclude Include="Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Loader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="KinectMovement.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -84,10 +90,28 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="fshader.glsl">
+    <None Include="Shader\texvshader.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="vshader.glsl">
+    <None Include="Shader\fshader_gouraud.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shader\fshader_phong.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shader\vshader_gouraud.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shader\vshader_phong.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shader\texfshader.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shader\modvshader.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shader\modfshader.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

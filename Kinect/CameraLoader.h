@@ -1,9 +1,9 @@
-#ifndef LOADER
-#define LOADER
+#ifndef CAMLOADER
+#define CAMLOADER
 
 #include <glew/glew.h>
 
-struct model
+struct camera_model
 {
 	GLuint vaoHandle;
 	GLuint elementBufferHandle;
@@ -15,8 +15,8 @@ struct model
 };
 
 
-struct model load_modelColor();
+struct camera_model load_modelColor(GLfloat width, GLfloat height);
 
-struct model load_modelDepth();
+struct camera_model load_modelDepth(GLfloat width, GLfloat height);
 
 #endif

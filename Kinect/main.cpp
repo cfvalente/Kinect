@@ -10,7 +10,8 @@
 #include "Shader.h"
 #include "Controls.h"
 #include "Renderer.h"
-#include "Loader.h"
+#include "ModelLoader.h"
+#include "CameraLoader.h"
 
 #include <Windows.h>
 #include <Ole2.h>
@@ -28,6 +29,14 @@
 #define widthDepth 640
 #define heightDepth 480
 
+#define widthColorf 1280.0f
+#define heightColorf 960.0f
+#define widthDepthf 640.0f
+#define heightDepthf 480.0f
+
+#define orthoZNear 0.1f
+#define orthoZFar 4050.0f
+
 using namespace std;
 using namespace glm;
 
@@ -36,22 +45,26 @@ GLuint programHandle;
 mat4 ModelView;
 mat4 Model;
 mat4 View;
+mat4 OrthoProjection;
 mat4 Projection;
 mat3 Normal;
 
-vec3 position = vec3(0.0f,0.0f,40.0f);
+vec3 position = vec3(0.0f,0.0f,10.0f);
 vec3 direction = vec3(0.0f, 0.0f,-1.0f);
 vec3 up = vec3(0.0f,1.0f,0.0f);
 
 int renderingMode;
 
-struct model model_dataColor;
-struct model model_dataDepth;
+struct camera_model model_dataColor;
+//struct camera_model model_dataDepth;
 
 GLFWwindow* window;
 
-char *vshader_name = "vshader.glsl";
-char *fshader_name = "fshader.glsl";
+char *texvshader_name = "Shader/texvshader.glsl";
+char *texfshader_name = "Shader/texfshader.glsl";
+
+char *modvshader_name = "Shader/modvshader.glsl";
+char *modfshader_name = "Shader/modfshader.glsl";
 
 
 // OpenGL Variables
@@ -68,6 +81,7 @@ INuiSensor* sensor;            // The kinect sensor
 
 // ArUco variables
 aruco::CameraParameters CamParam;
+vector<aruco::Marker> Markers;
 
 static void error_callback(int error, const char* description)
 {
@@ -114,32 +128,33 @@ void GL_init(int argc, char *argv[])
 
 	renderingMode = rendering::all;
 
-	Projection = glm::perspective(45.0f, 1280.0f / 1024.0f, 0.1f, 500.0f);
+	Projection = glm::perspective(45.0f, widthColorf / heightColorf, 0.1f, 500.0f);
+	OrthoProjection = glm::ortho(0.0f,widthColorf,0.0f,heightColorf, orthoZNear, orthoZFar);
 
 	Model = mat4(1.0);
 
 	View = glm::lookAt(position,position+direction,up);
 
-	model_dataColor = load_modelColor();
-	model_dataDepth = load_modelDepth();
+	model_dataColor = load_modelColor(widthColorf,heightColorf);
+	//model_dataDepth = load_modelDepth(widthDepthf,heightDepthf);
 
 	glfwSetErrorCallback(error_callback);
 	glfwSetKeyCallback(window, key_callback);
-	glfwSetCursorPosCallback(window,mouse_position_callback);
+	//glfwSetCursorPosCallback(window,mouse_position_callback);
 	glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_HIDDEN);
 }
 
 void movement()
 {   
-	View = lookAt(position,position+direction,up);
+	//View = lookAt(position,position+direction,up);
 }
 
 bool AR_MarkerDetectorInit()
 {
-	cv::namedWindow("in",1);
+	//cv::namedWindow("in",1);
 	try
 	{
-		CamParam.readFromXMLFile("camera.yml"); 
+		CamParam.readFromXMLFile("Camera/camera.yml"); 
 		return 1;
 	}
 	catch(exception e)
@@ -154,8 +169,7 @@ bool AR_MarkerDetector()
 {
 	GLubyte *imageData;
 	aruco::MarkerDetector MDetector;
-	vector<aruco::Marker> Markers;
-	float MarkerSize = 1.7;
+	float MarkerSize = 0.127f;
 	imageData = new GLubyte[widthColor*heightColor*3];
 	for(int i=0; i<widthColor*heightColor; i++)
 	{
@@ -179,11 +193,11 @@ bool AR_MarkerDetector()
 	for (unsigned int i=0;i<Markers.size();i++) 
 	{
             cout<<Markers[i]<<endl;
-            Markers[i].draw(Tex,cv::Scalar(0,0,255),2);
+            //Markers[i].draw(Tex,cv::Scalar(0,0,255),2);
 			Markers[i].glGetModelViewMatrix(mvp);
 			point = Markers[i].getCenter();
 	}
-	cv::imshow("in",Tex);
+	//cv::imshow("in",Tex);
 	delete [] imageData;
 	return 1;
 }
@@ -193,27 +207,31 @@ int main(int argc, char *argv[])
 {
 	GL_init(argc,argv);
 	if(!Kinect_init(sensor, rgbStream, depthStream)) return 1;
-	if(!useShader(programHandle,compileShader(programHandle,vshader_name,fshader_name))) return 1;
 	if(!AR_MarkerDetectorInit()) return 1;
 	while(!glfwWindowShouldClose(window))
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glfwPollEvents();
 		movement();
+
+		if(!useShader(programHandle,compileShader(programHandle,texvshader_name,texfshader_name))) return 1;
 		getKinectColorData(dataColor, sensor, rgbStream, widthColor, heightColor);
 		textureIdColor = TextureLoader(dataColor, widthColor, heightColor);
-		rendererColor(programHandle, Model, View, Projection, renderingMode, model_dataColor, window);
+		rendererColor(programHandle, Model, View, OrthoProjection, renderingMode, model_dataColor, window);
 
-		getKinectDepthData(dataDepth, sensor, depthStream, widthDepth, heightDepth);
-		textureIdDepth = TextureLoader(dataDepth, widthDepth, heightDepth);
-		rendererDepth(programHandle, Model, View, Projection, renderingMode, model_dataDepth, window);
+		if(!useShader(programHandle,compileShader(programHandle,modvshader_name,modfshader_name))) return 1;
+		renderer(programHandle, Model, View, Projection, mat3(View*Model), renderingMode, model_data, window);
+
+		//getKinectDepthData(dataDepth, sensor, depthStream, widthDepth, heightDepth);
+		//textureIdDepth = TextureLoader(dataDepth, widthDepth, heightDepth);
+		//rendererDepth(programHandle, Model, View, Projection, renderingMode, model_dataDepth, window);
 
 		glfwSwapBuffers(window);
 
 		AR_MarkerDetector();
 
 		TextureUnloader(&textureIdColor);
-		TextureUnloader(&textureIdDepth);
+		//TextureUnloader(&textureIdDepth);
 	}
 	glfwTerminate();
 	return 0;

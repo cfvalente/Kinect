@@ -1,10 +1,7 @@
 #include <iostream>
 #include <string>
 #include <stdio.h>
-#include "Loader.h"
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
+#include "CameraLoader.h"
 
 
 
@@ -16,25 +13,62 @@
 
 
 
-struct model load_position_uvColor()
+struct camera_model load_position_uvColor(GLfloat width, GLfloat height)
 {
-	struct model model_data;
+	struct camera_model model_data;
 	model_data.num_vertices = 4;
 	model_data.num_faces = 2;
 	model_data.position_data = new float [18];
 	model_data.uv_data = new float [12];
 	model_data.face_data = new unsigned int [6];
-	model_data.position_data[0] = -5.0f;
-	model_data.position_data[1] = 5.0f;
+	model_data.position_data[0] = 0.0f;
+	model_data.position_data[1] = height;
+	model_data.position_data[2] = -4000.0f;
+	model_data.position_data[3] = width;
+	model_data.position_data[4] = 0.0f;
+	model_data.position_data[5] = -4000.0f;
+	model_data.position_data[6] = 0.0f;
+	model_data.position_data[7] = 0.0f;
+	model_data.position_data[8] = -4000.0f;
+	model_data.position_data[9] = width;
+	model_data.position_data[10] = height;
+	model_data.position_data[11] = -4000.0f;
+	model_data.uv_data[0] = 1.0f;
+	model_data.uv_data[1] = 0.0f;
+	model_data.uv_data[2] = 0.0f;
+	model_data.uv_data[3] = 1.0f;
+	model_data.uv_data[4] = 1.0f;
+	model_data.uv_data[5] = 1.0f;
+	model_data.uv_data[6] = 0.0f;
+	model_data.uv_data[7] = 0.0f;
+	model_data.face_data[0] = 0;
+	model_data.face_data[1] = 1;
+	model_data.face_data[2] = 2;
+	model_data.face_data[3] = 0;
+	model_data.face_data[4] = 3;
+	model_data.face_data[5] = 1;
+	return model_data;
+}
+
+struct camera_model load_position_uvDepth(GLfloat width, GLfloat height)
+{
+	struct camera_model model_data;
+	model_data.num_vertices = 4;
+	model_data.num_faces = 2;
+	model_data.position_data = new float [18];
+	model_data.uv_data = new float [12];
+	model_data.face_data = new unsigned int [6];
+	model_data.position_data[0] = 0.0f;
+	model_data.position_data[1] = height;
 	model_data.position_data[2] = 0.0f;
-	model_data.position_data[3] = 5.0f;
-	model_data.position_data[4] = -5.0f;
+	model_data.position_data[3] = width;
+	model_data.position_data[4] = 0.0f;
 	model_data.position_data[5] = 0.0f;
-	model_data.position_data[6] = -5.0f;
-	model_data.position_data[7] = -5.0f;
+	model_data.position_data[6] = 0.0f;
+	model_data.position_data[7] = 0.0f;
 	model_data.position_data[8] = 0.0f;
-	model_data.position_data[9] = 5.0f;
-	model_data.position_data[10] = 5.0f;
+	model_data.position_data[9] = width;
+	model_data.position_data[10] = height;
 	model_data.position_data[11] = 0.0f;
 	model_data.uv_data[0] = 1.0f;
 	model_data.uv_data[1] = 0.0f;
@@ -53,47 +87,10 @@ struct model load_position_uvColor()
 	return model_data;
 }
 
-struct model load_position_uvDepth()
-{
-	struct model model_data;
-	model_data.num_vertices = 4;
-	model_data.num_faces = 2;
-	model_data.position_data = new float [18];
-	model_data.uv_data = new float [12];
-	model_data.face_data = new unsigned int [6];
-	model_data.position_data[0] = 5.0f;
-	model_data.position_data[1] = 5.0f;
-	model_data.position_data[2] = 0.0f;
-	model_data.position_data[3] = 15.0f;
-	model_data.position_data[4] = -5.0f;
-	model_data.position_data[5] = 0.0f;
-	model_data.position_data[6] = 5.0f;
-	model_data.position_data[7] = -5.0f;
-	model_data.position_data[8] = 0.0f;
-	model_data.position_data[9] = 15.0f;
-	model_data.position_data[10] = 5.0f;
-	model_data.position_data[11] = 0.0f;
-	model_data.uv_data[0] = 1.0f;
-	model_data.uv_data[1] = 0.0f;
-	model_data.uv_data[2] = 0.0f;
-	model_data.uv_data[3] = 1.0f;
-	model_data.uv_data[4] = 1.0f;
-	model_data.uv_data[5] = 1.0f;
-	model_data.uv_data[6] = 0.0f;
-	model_data.uv_data[7] = 0.0f;
-	model_data.face_data[0] = 0;
-	model_data.face_data[1] = 1;
-	model_data.face_data[2] = 2;
-	model_data.face_data[3] = 0;
-	model_data.face_data[4] = 3;
-	model_data.face_data[5] = 1;
-	return model_data;
-}
 
-
-struct model load_modelColor()
+struct camera_model load_modelColor(GLfloat width, GLfloat height)
 {
-	struct model model_data;
+	struct camera_model model_data;
 
 
 	GLuint vboHandles[2];
@@ -102,7 +99,7 @@ struct model load_modelColor()
 	glGenBuffers(1,&vboHandles[1]);
 	GLuint UVBufferHandle = vboHandles[1];
 
-	model_data = load_position_uvColor();
+	model_data = load_position_uvColor(width, height);
 
 	glGenBuffers(1, &model_data.elementBufferHandle);
 
@@ -131,9 +128,9 @@ struct model load_modelColor()
 }
 
 
-struct model load_modelDepth()
+struct camera_model load_modelDepth(GLfloat width, GLfloat height)
 {
-	struct model model_data;
+	struct camera_model model_data;
 
 
 	GLuint vboHandles[2];
@@ -142,7 +139,7 @@ struct model load_modelDepth()
 	glGenBuffers(1,&vboHandles[1]);
 	GLuint UVBufferHandle = vboHandles[1];
 
-	model_data = load_position_uvDepth();
+	model_data = load_position_uvDepth(width, height);
 
 	glGenBuffers(1, &model_data.elementBufferHandle);
 

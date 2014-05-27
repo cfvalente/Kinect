@@ -159,8 +159,9 @@
     <ClCompile Include="File.cpp" />
     <ClCompile Include="Info.cpp" />
     <ClCompile Include="Kinect.cpp" />
-    <ClCompile Include="Loader.cpp" />
+    <ClCompile Include="CameraLoader.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ModelLoader.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Texture.cpp" />
@@ -171,7 +172,8 @@
     <ClInclude Include="Info.h" />
     <ClInclude Include="Kinect.h" />
     <ClInclude Include="KinectMovement.h" />
-    <ClInclude Include="Loader.h" />
+    <ClInclude Include="CameraLoader.h" />
+    <ClInclude Include="ModelLoader.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Shader.h" />
@@ -181,8 +183,14 @@
     <ResourceCompile Include="Kinect.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="fshader.glsl" />
-    <None Include="vshader.glsl" />
+    <None Include="Shader\fshader_gouraud.glsl" />
+    <None Include="Shader\fshader_phong.glsl" />
+    <None Include="Shader\modfshader.glsl" />
+    <None Include="Shader\modvshader.glsl" />
+    <None Include="Shader\texfshader.glsl" />
+    <None Include="Shader\texvshader.glsl" />
+    <None Include="Shader\vshader_gouraud.glsl" />
+    <None Include="Shader\vshader_phong.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
