@@ -40,7 +40,8 @@
 using namespace std;
 using namespace glm;
 
-GLuint programHandle;
+GLuint texprogramHandle;
+GLuint modprogramHandle;
 
 mat4 ModelView;
 mat4 Model;
@@ -65,6 +66,9 @@ char *texfshader_name = "Shader/texfshader.glsl";
 
 char *modvshader_name = "Shader/modvshader.glsl";
 char *modfshader_name = "Shader/modfshader.glsl";
+
+int texshader;
+int modshader;
 
 
 // OpenGL Variables
@@ -128,7 +132,7 @@ void GL_init(int argc, char *argv[])
 
 	renderingMode = rendering::all;
 
-	Projection = glm::perspective(45.0f, widthColorf / heightColorf, 0.1f, 500.0f);
+	Projection = glm::perspective(100.0f, widthColorf / heightColorf, 0.1f, 4000.0f);
 	OrthoProjection = glm::ortho(0.0f,widthColorf,0.0f,heightColorf, orthoZNear, orthoZFar);
 
 	Model = mat4(1.0);
@@ -188,16 +192,6 @@ bool AR_MarkerDetector()
 	{
 		return 0;
 	}
-	double mvp[16];
-	cv::Point2f point;
-	for (unsigned int i=0;i<Markers.size();i++) 
-	{
-            cout<<Markers[i]<<endl;
-            //Markers[i].draw(Tex,cv::Scalar(0,0,255),2);
-			Markers[i].glGetModelViewMatrix(mvp);
-			point = Markers[i].getCenter();
-	}
-	//cv::imshow("in",Tex);
 	delete [] imageData;
 	return 1;
 }
@@ -208,19 +202,38 @@ int main(int argc, char *argv[])
 	GL_init(argc,argv);
 	if(!Kinect_init(sensor, rgbStream, depthStream)) return 1;
 	if(!AR_MarkerDetectorInit()) return 1;
+	struct model model_data = load_model("Model/teapot.obj");
+	texshader = compileShader(texprogramHandle,texvshader_name,texfshader_name);
+	modshader = compileShader(modprogramHandle,modvshader_name,modfshader_name);
+
 	while(!glfwWindowShouldClose(window))
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glfwPollEvents();
 		movement();
 
-		if(!useShader(programHandle,compileShader(programHandle,texvshader_name,texfshader_name))) return 1;
+		if(!useShader(texprogramHandle,texshader)) return 1;
 		getKinectColorData(dataColor, sensor, rgbStream, widthColor, heightColor);
 		textureIdColor = TextureLoader(dataColor, widthColor, heightColor);
-		rendererColor(programHandle, Model, View, OrthoProjection, renderingMode, model_dataColor, window);
+		rendererColor(texprogramHandle, Model, View, OrthoProjection, renderingMode, model_dataColor, window);
 
-		if(!useShader(programHandle,compileShader(programHandle,modvshader_name,modfshader_name))) return 1;
-		renderer(programHandle, Model, View, Projection, mat3(View*Model), renderingMode, model_data, window);
+		if(!useShader(modprogramHandle,modshader)) return 1;
+		AR_MarkerDetector();
+		for (unsigned int i=0;i<Markers.size();i++) 
+		{
+			double aux[16];
+            cout<<Markers[i]<<endl;
+            //Markers[i].draw(Tex,cv::Scalar(0,0,255),2);
+			Markers[i].glGetModelViewMatrix(aux);
+			mat4 mvp((float) aux[0],(float) aux[1],(float) aux[2],(float) aux[3],
+				(float) aux[4],(float) aux[5],(float) aux[6],(float) aux[7],
+				(float) aux[8],(float) aux[9],(float) aux[10],(float) aux[11],
+				(float) aux[12],(float) aux[13],(float) aux[14],(float) aux[15]);
+
+			//renderer(modprogramHandle, mvp*scale(Model,vec3(0.01,0.01,0.01)), model_data, window);
+			renderer(modprogramHandle, Projection*mvp*scale(Model,vec3(0.01,0.01,0.01)), model_data, window);
+		}
+		//renderer(modprogramHandle,Projection*View*scale(Model,vec3(0.02,0.02,0.02)), model_data, window);
 
 		//getKinectDepthData(dataDepth, sensor, depthStream, widthDepth, heightDepth);
 		//textureIdDepth = TextureLoader(dataDepth, widthDepth, heightDepth);
@@ -228,7 +241,6 @@ int main(int argc, char *argv[])
 
 		glfwSwapBuffers(window);
 
-		AR_MarkerDetector();
 
 		TextureUnloader(&textureIdColor);
 		//TextureUnloader(&textureIdDepth);
