@@ -32,24 +32,6 @@ void printShader(int shaderIndex)
 	cout << "Fragment Shader name: " << shaders[shaderIndex].fshader_name << "\n";
 }
 
-bool useShader(GLuint &programHandle, int shaderIndex)
-{
-	if(shaderIndex >= shaders.size())
-	{
-		cout << "Error Shader: Out of bound index\n";
-		return false;
-	}
-
-	glAttachShader(programHandle,shaders[shaderIndex].vshader);
-	glAttachShader(programHandle,shaders[shaderIndex].fshader);
-
-	glLinkProgram(programHandle);
-	if(linkStatus(programHandle))
-	{
-		glUseProgram(programHandle);
-	}
-	return true;
-}
 
 int compileShader(GLuint &programHandle, char *vshader_name, char *fshader_name)
 {
@@ -78,7 +60,14 @@ int compileShader(GLuint &programHandle, char *vshader_name, char *fshader_name)
 		res.fshader_name = fshader_name;
 		res.vshader_name = vshader_name;
 		shaders.push_back(res);
-		return (int) shaders.size()-1;
 	}
-	return -1;
+	glAttachShader(programHandle,shaders[shaders.size()-1].vshader);
+	glAttachShader(programHandle,shaders[shaders.size()-1].fshader);
+
+	glLinkProgram(programHandle);
+	if(linkStatus(programHandle))
+	{
+		return true;
+	}
+	return false;
 }

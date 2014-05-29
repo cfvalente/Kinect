@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
 
+#include <omp.h>
+
 #include <glew/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -21,8 +23,10 @@
 #include "Texture.h"
 
 #include <opencv2/core/core.hpp>
-#include <aruco\aruco.h>
 #include <opencv2/highgui/highgui.hpp>
+
+#include <aruco\aruco.h>
+#include "AR.h"
 
 #define widthColor 1280
 #define heightColor 960
@@ -36,6 +40,8 @@
 
 #define orthoZNear 0.1f
 #define orthoZFar 4050.0f
+
+#define MarkerSize 0.127f
 
 using namespace std;
 using namespace glm;
@@ -67,9 +73,6 @@ char *texfshader_name = "Shader/texfshader.glsl";
 char *modvshader_name = "Shader/modvshader.glsl";
 char *modfshader_name = "Shader/modfshader.glsl";
 
-int texshader;
-int modshader;
-
 
 // OpenGL Variables
 GLuint textureIdColor;              // ID of the texture to contain Kinect RGB Data
@@ -84,8 +87,8 @@ HANDLE depthStream;              // The identifier of the Kinect's Depth Camera
 INuiSensor* sensor;            // The kinect sensor
 
 // ArUco variables
-aruco::CameraParameters CamParam;
 vector<aruco::Marker> Markers;
+
 
 static void error_callback(int error, const char* description)
 {
@@ -153,49 +156,6 @@ void movement()
 	//View = lookAt(position,position+direction,up);
 }
 
-bool AR_MarkerDetectorInit()
-{
-	//cv::namedWindow("in",1);
-	try
-	{
-		CamParam.readFromXMLFile("Camera/camera.yml"); 
-		return 1;
-	}
-	catch(exception e)
-	{
-		return 0;
-	}
-}
-
-
-
-bool AR_MarkerDetector()
-{
-	GLubyte *imageData;
-	aruco::MarkerDetector MDetector;
-	float MarkerSize = 0.127f;
-	imageData = new GLubyte[widthColor*heightColor*3];
-	for(int i=0; i<widthColor*heightColor; i++)
-	{
-		imageData[3*i]=dataColor[4*i];
-		imageData[3*i+1]=dataColor[4*i+1];
-		imageData[3*i+2]=dataColor[4*i+2];
-	}
-	cv::Mat Tex(heightColor, widthColor, CV_8UC3, imageData);
-
-	CamParam.resize(Tex.size());
-	try
-	{
-		MDetector.detect(Tex,Markers,CamParam,MarkerSize);
-	}
-	catch(exception e)
-	{
-		return 0;
-	}
-	delete [] imageData;
-	return 1;
-}
-
 
 int main(int argc, char *argv[])
 {
@@ -203,8 +163,8 @@ int main(int argc, char *argv[])
 	if(!Kinect_init(sensor, rgbStream, depthStream)) return 1;
 	if(!AR_MarkerDetectorInit()) return 1;
 	struct model model_data = load_model("Model/teapot.obj");
-	texshader = compileShader(texprogramHandle,texvshader_name,texfshader_name);
-	modshader = compileShader(modprogramHandle,modvshader_name,modfshader_name);
+	if(!compileShader(texprogramHandle,texvshader_name,texfshader_name)) return 1;
+	if(!compileShader(modprogramHandle,modvshader_name,modfshader_name)) return 1;
 
 	while(!glfwWindowShouldClose(window))
 	{
@@ -212,28 +172,25 @@ int main(int argc, char *argv[])
 		glfwPollEvents();
 		movement();
 
-		if(!useShader(texprogramHandle,texshader)) return 1;
+		glUseProgram(texprogramHandle);
 		getKinectColorData(dataColor, sensor, rgbStream, widthColor, heightColor);
 		textureIdColor = TextureLoader(dataColor, widthColor, heightColor);
 		rendererColor(texprogramHandle, Model, View, OrthoProjection, renderingMode, model_dataColor, window);
 
-		if(!useShader(modprogramHandle,modshader)) return 1;
-		AR_MarkerDetector();
+		glUseProgram(modprogramHandle);
+		AR_MarkerDetector(Markers, dataColor, widthColor, heightColor, MarkerSize);
 		for (unsigned int i=0;i<Markers.size();i++) 
 		{
 			double aux[16];
             cout<<Markers[i]<<endl;
-            //Markers[i].draw(Tex,cv::Scalar(0,0,255),2);
 			Markers[i].glGetModelViewMatrix(aux);
 			mat4 mvp((float) aux[0],(float) aux[1],(float) aux[2],(float) aux[3],
 				(float) aux[4],(float) aux[5],(float) aux[6],(float) aux[7],
 				(float) aux[8],(float) aux[9],(float) aux[10],(float) aux[11],
 				(float) aux[12],(float) aux[13],(float) aux[14],(float) aux[15]);
 
-			//renderer(modprogramHandle, mvp*scale(Model,vec3(0.01,0.01,0.01)), model_data, window);
 			renderer(modprogramHandle, Projection*mvp*scale(Model,vec3(0.01,0.01,0.01)), model_data, window);
 		}
-		//renderer(modprogramHandle,Projection*View*scale(Model,vec3(0.02,0.02,0.02)), model_data, window);
 
 		//getKinectDepthData(dataDepth, sensor, depthStream, widthDepth, heightDepth);
 		//textureIdDepth = TextureLoader(dataDepth, widthDepth, heightDepth);
