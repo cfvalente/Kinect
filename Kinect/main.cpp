@@ -45,6 +45,7 @@
 
 using namespace std;
 using namespace glm;
+using namespace cv;
 
 GLuint texprogramHandle;
 GLuint modprogramHandle;
@@ -75,16 +76,16 @@ char *modfshader_name = "Shader/modfshader.glsl";
 
 
 // OpenGL Variables
-GLuint textureIdColor;              // ID of the texture to contain Kinect RGB Data
-GLubyte dataColor[widthColor*heightColor*4];  // BGRA array containing the texture data
+GLuint textureIdColor;							// ID of the texture to contain Kinect RGB Data
+GLubyte dataColor[widthColor*heightColor*3];	// BGRA array containing the texture data
 
-GLuint textureIdDepth;              // ID of the texture to contain Kinect Depth Data
-GLubyte dataDepth[widthDepth*heightDepth*4];  // BGRA array containing the texture data
+GLuint textureIdDepth;							// ID of the texture to contain Kinect Depth Data
+GLubyte dataDepth[widthDepth*heightDepth*4];	// BGRA array containing the texture data
 
 // Kinect variables
-HANDLE rgbStream;              // The identifier of the Kinect's RGB Camera
-HANDLE depthStream;              // The identifier of the Kinect's Depth Camera
-INuiSensor* sensor;            // The kinect sensor
+HANDLE rgbStream;								// The identifier of the Kinect's RGB Camera
+HANDLE depthStream;		   						// The identifier of the Kinect's Depth Camera
+INuiSensor* sensor;								// The kinect sensor
 
 // ArUco variables
 vector<aruco::Marker> Markers;
@@ -160,11 +161,15 @@ void movement()
 int main(int argc, char *argv[])
 {
 	GL_init(argc,argv);
-	if(!Kinect_init(sensor, rgbStream, depthStream)) return 1;
+	//if(!Kinect_init(sensor, rgbStream, depthStream)) return 1;
 	if(!AR_MarkerDetectorInit()) return 1;
 	struct model model_data = load_model("Model/teapot.obj");
 	if(!compileShader(texprogramHandle,texvshader_name,texfshader_name)) return 1;
 	if(!compileShader(modprogramHandle,modvshader_name,modfshader_name)) return 1;
+
+	Mat image;
+	image = imread("Markers/_DSC0068.jpg", CV_LOAD_IMAGE_COLOR);
+	AR_MarkerDetectorFromImage(Markers, image, MarkerSize);
 
 	while(!glfwWindowShouldClose(window))
 	{
@@ -172,24 +177,26 @@ int main(int argc, char *argv[])
 		glfwPollEvents();
 		movement();
 
+
 		glUseProgram(texprogramHandle);
-		getKinectColorData(dataColor, sensor, rgbStream, widthColor, heightColor);
-		textureIdColor = TextureLoader(dataColor, widthColor, heightColor);
+		//getKinectColorData(dataColor, sensor, rgbStream, widthColor, heightColor);
+		//textureIdColor = TextureLoader(dataColor, heightColor, widthColor);
+		textureIdColor = CVImageToGLTexture(image);
 		rendererColor(texprogramHandle, Model, View, OrthoProjection, renderingMode, model_dataColor, window);
 
 		glUseProgram(modprogramHandle);
-		AR_MarkerDetector(Markers, dataColor, widthColor, heightColor, MarkerSize);
+		//AR_MarkerDetector(Markers, dataColor, widthColor, heightColor, MarkerSize);
 		for (unsigned int i=0;i<Markers.size();i++) 
 		{
 			double aux[16];
-            cout<<Markers[i]<<endl;
+            //cout<<Markers[i]<<endl;
 			Markers[i].glGetModelViewMatrix(aux);
-			mat4 mvp((float) aux[0],(float) aux[1],(float) aux[2],(float) aux[3],
+			mat4 mv((float) aux[0],(float) aux[1],(float) aux[2],(float) aux[3],
 				(float) aux[4],(float) aux[5],(float) aux[6],(float) aux[7],
 				(float) aux[8],(float) aux[9],(float) aux[10],(float) aux[11],
 				(float) aux[12],(float) aux[13],(float) aux[14],(float) aux[15]);
-
-			renderer(modprogramHandle, Projection*mvp*scale(Model,vec3(0.01,0.01,0.01)), model_data, window);
+			for(int p = 0; p < 4; p++) printf("MVP-R%d -- %f %f %f %f\n",p,aux[4*p],aux[4*p+1],aux[4*p+2],aux[4*p+3]); 
+			renderer(modprogramHandle, Projection*mv*scale(glm::rotate(Model,-30.0f,glm::vec3(1.0,0.0,0.0)),vec3(0.005,0.005,0.005)), model_data, window);
 		}
 
 		//getKinectDepthData(dataDepth, sensor, depthStream, widthDepth, heightDepth);
@@ -197,8 +204,6 @@ int main(int argc, char *argv[])
 		//rendererDepth(programHandle, Model, View, Projection, renderingMode, model_dataDepth, window);
 
 		glfwSwapBuffers(window);
-
-
 		TextureUnloader(&textureIdColor);
 		//TextureUnloader(&textureIdDepth);
 	}

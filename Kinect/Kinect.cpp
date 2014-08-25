@@ -91,7 +91,7 @@ void getKinectColorData(GLubyte* destColor, INuiSensor* &sensor, HANDLE &rgbStre
     NUI_IMAGE_FRAME imageFrame;
     NUI_LOCKED_RECT LockedRect;
 	INuiFrameTexture* texture;
-
+	int alpha = 0;
 
 	if (FAILED(sensor->NuiImageStreamGetNextFrame(rgbStream, 0, &imageFrame))) return;
 	texture = imageFrame.pFrameTexture;
@@ -103,7 +103,12 @@ void getKinectColorData(GLubyte* destColor, INuiSensor* &sensor, HANDLE &rgbStre
 
         while (pBufferRun < pBufferEnd) 
 		{
-            *destColor++ = *pBufferRun++;
+			if(alpha!=4)
+			{
+				*destColor++ = *pBufferRun++;
+				alpha=0;
+			}
+			alpha++;
 		}
 
 	}

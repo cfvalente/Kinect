@@ -27,18 +27,18 @@ bool AR_MarkerDetectorInit()
 
 bool AR_MarkerDetector(vector<aruco::Marker> &Markers, GLubyte dataColor[], int widthColor, int heightColor, float MarkerSize)
 {
-	GLubyte *imageData;
+	//GLubyte *imageData;
 	aruco::MarkerDetector MDetector;
-	imageData = new GLubyte[widthColor*heightColor*3];
+	//imageData = new GLubyte[widthColor*heightColor*3];
 
-	#pragma omp parallel for schedule(static)
+	/*#pragma omp parallel for schedule(static)
 		for(int i=0; i<widthColor*heightColor; i++)
 		{
 			imageData[3*i]=dataColor[4*i];
 			imageData[3*i+1]=dataColor[4*i+1];
 			imageData[3*i+2]=dataColor[4*i+2];
-		}
-	cv::Mat Tex(heightColor, widthColor, CV_8UC3, imageData);
+		}*/
+	cv::Mat Tex(heightColor, widthColor, CV_8UC3, dataColor);
 
 	CamParam.resize(Tex.size());
 	try
@@ -49,6 +49,21 @@ bool AR_MarkerDetector(vector<aruco::Marker> &Markers, GLubyte dataColor[], int 
 	{
 		return 0;
 	}
-	delete [] imageData;
+	//delete [] imageData;
+	return 1;
+}
+
+bool AR_MarkerDetectorFromImage(vector<aruco::Marker> &Markers, cv::Mat Tex, float MarkerSize)
+{
+	aruco::MarkerDetector MDetector;
+	CamParam.resize(Tex.size());
+	try
+	{
+		MDetector.detect(Tex,Markers,CamParam,MarkerSize);
+	}
+	catch(exception e)
+	{
+		return 0;
+	}
 	return 1;
 }
