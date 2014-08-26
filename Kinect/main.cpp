@@ -117,6 +117,35 @@ void mouse_position_callback(GLFWwindow* window, double x, double y)
 	mouse_movement(x,y,size_x,size_y,direction,up);
 }
 
+void monta_matriz_de_projecao()
+{
+	float znear = 0.01; // Near clipping distance
+	float zfar = 1000; // Far clipping distance
+	float f_x = 1.0591254265877012e+003; // Focal length in x axis
+	float f_y = 1.0594512153069588e+003; // Focal length in y axis (usually
+	float c_x = 6.4051354189348990e+002; // Camera primary point x
+	float c_y = 4.8137915848944107e+002; // Camera primary point y
+	/*Projection.value[0] = - 2.0 * f_x;
+	Projection.operator[1] = 0.0;
+	Projection.operator[2] = 0.0;
+	Projection.operator[3] = 0.0;
+	Projection.operator[4] = 0.0;
+	Projection.operator[5] = 2.0 * f_y;
+	Projection.operator[6] = 0.0;
+	Projection.operator[7] = 0.0;
+	Projection.operator[8] = 2.0 * c_x / widthColor - 1.0;
+	Projection.operator[9] = 2.0 * c_y / heightColor - 1.0;
+	Projection.operator[10] = -( zfar+znear ) / ( zfar - znear );
+	Projection.operator[11] = -1.0;
+	Projection.operator[12] = 0.0;
+	Projection.operator[13] = 0.0;
+	Projection.operator[14] = -2.0 * zfar * znear / ( zfar - znear );
+	Projection.operator[15] = 0.0;*/
+	Projection = glm::mat4(- 2.0 * f_x,0.0,0.0,0.0,0.0,2.0 * f_y,0.0,0.0,2.0 * c_x / widthColor - 1.0,2.0 * c_y / heightColor - 1.0,-( zfar+znear ) / ( zfar - znear ),-1.0,0.0,0.0,-2.0 * zfar * znear / ( zfar - znear ),0.0);
+	Projection = glm::transpose(Projection);
+
+}
+
 /* Inicializacao de variaveis e objetos */
 void GL_init(int argc, char *argv[])
 {
@@ -136,7 +165,8 @@ void GL_init(int argc, char *argv[])
 
 	renderingMode = rendering::all;
 
-	Projection = glm::perspective(100.0f, widthColorf / heightColorf, 0.1f, 4000.0f);
+	//Projection = glm::perspective(100.0f, widthColorf / heightColorf, 0.1f, 4000.0f);
+	monta_matriz_de_projecao();
 	OrthoProjection = glm::ortho(0.0f,widthColorf,0.0f,heightColorf, orthoZNear, orthoZFar);
 
 	Model = mat4(1.0);
@@ -156,6 +186,9 @@ void movement()
 {   
 	//View = lookAt(position,position+direction,up);
 }
+
+
+
 
 
 int main(int argc, char *argv[])
@@ -189,7 +222,7 @@ int main(int argc, char *argv[])
 		for (unsigned int i=0;i<Markers.size();i++) 
 		{
 			double aux[16];
-            //cout<<Markers[i]<<endl;
+			//cout<<Markers[i]<<endl;
 			Markers[i].glGetModelViewMatrix(aux);
 			mat4 mv((float) aux[0],(float) aux[1],(float) aux[2],(float) aux[3],
 				(float) aux[4],(float) aux[5],(float) aux[6],(float) aux[7],
